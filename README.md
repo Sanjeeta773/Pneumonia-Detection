@@ -68,9 +68,16 @@ High recall and AUC are important for medical screening tasks.
 ---
 
 ## How to Run
-1. Install dependencies
+### 1. Install dependencies
+```bash
 pip install -r requirements.txt
-2. Train the model
+
+```
+### 2. Train the model
+```bash
 python3 main.py
-3. Evaluate the model
+```
+
+### 3. Evaluate the model
+```bash
 python3 evaluate.py
