@@ -1,46 +1,43 @@
 import torch
-import matplotlib.pyplot as plt
 import os
+import matplotlib.pyplot as plt
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
 
-
-def dice_loss_from_logits(logits, targets, eps: float = 1e-6):
-    probs = torch.sigmoid(logits)  # (B,1,H,W)
-    targets = targets.float()
-    dims = (1,2,3)
-    intersection = (probs * targets).sum(dims)
-    union = probs.sum(dims) + targets.sum(dims)
-    dice = (2.0 * intersection + eps) / (union + eps)
-    return 1.0 - dice.mean()
 
 @torch.no_grad()
-def dice_score_from_logits(logits, targets, eps: float = 1e-6):
+def classification_metrics(logits, labels):
+    """
+    Binary classification metrics for Pneumonia Detection
+    """
     probs = torch.sigmoid(logits)
     preds = (probs > 0.5).float()
-    targets = targets.float()
-    dims = (1,2,3)
-    intersection = (preds * targets).sum(dims)
-    union = preds.sum(dims) + targets.sum(dims)
-    dice = (2.0 * intersection + eps) / (union + eps)
-    return dice.mean().item()
+
+    y_true = labels.cpu().numpy()
+    y_pred = preds.cpu().numpy()
+    y_prob = probs.cpu().numpy()
+
+    metrics = {
+        "accuracy": accuracy_score(y_true, y_pred),
+        "precision": precision_score(y_true, y_pred, zero_division=0),
+        "recall": recall_score(y_true, y_pred, zero_division=0),
+        "f1": f1_score(y_true, y_pred, zero_division=0),
+        "auc": roc_auc_score(y_true, y_prob),
+    }
+
+    return metrics
 
 
-def save_loss_curve(train_losses, val_losses, val_metrics, out_dir, filename="loss_curve.png"):
-    """
-    Saves train/validation loss curves to out_dir.
-    """
+def save_training_curves(train_losses, val_losses, val_f1, out_dir):
     os.makedirs(out_dir, exist_ok=True)
 
-    plt.figure()
-    plt.plot(train_losses, label='Train Loss')
-    plt.plot(val_losses, label='Validation Loss')
-    plt.plot(val_metrics, label='Validation Metric')
-    plt.xlabel('Epoch')
-    plt.ylabel('Loss')
-    plt.title('Training and Validation Loss Curve')
+    plt.figure(figsize=(8,5))
+    plt.plot(train_losses, label="Train Loss")
+    plt.plot(val_losses, label="Validation Loss")
+    plt.plot(val_f1, label="Validation F1-score")
+
+    plt.xlabel("Epoch")
+    plt.ylabel("Value")
+    plt.title("Training Curves")
     plt.legend()
-
-    save_path = os.path.join(out_dir, filename)
-    plt.savefig(save_path)
+    plt.savefig(os.path.join(out_dir, "training_curves.png"))
     plt.close()
-
-    print(f"Saved loss curve at: {save_path}")
