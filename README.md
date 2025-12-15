@@ -39,7 +39,7 @@ The model outputs a **logit**, and `BCEWithLogitsLoss` is used during training.
 
 The model is trained using:
 - Adam optimizer
-- Binary Cross Entropy loss
+- Binary Cross Entropy loss=
 - GPU if available, otherwise CPU
 
 The best model weights are saved to:
@@ -68,11 +68,9 @@ High recall and AUC are important for medical screening tasks.
 ---
 
 ## How to Run
-
-### 1. Install dependencies
-```bash
+1. Install dependencies
 pip install -r requirements.txt
-### 2. Train the model
+2. Train the model
 python3 main.py
-### 3. Evaluate the model
+3. Evaluate the model
 python3 evaluate.py
